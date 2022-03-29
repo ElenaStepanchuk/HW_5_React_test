@@ -1,9 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { toast } from 'react-toastify';
 import { TrendingFilms } from '../helpers/FetchFilms';
-
 const Gallery = styled.ul`
   display: grid;
   justify-content: center;
@@ -51,7 +49,6 @@ const GalleryItemBtn = styled.button`
 const GalleryItemLink = styled(Link)`
   text-decoration: none;
 `;
-
 const HomePage = () => {
   const [films, setFilms] = useState([]);
   const [page, setPage] = useState(1);
@@ -71,11 +68,6 @@ const HomePage = () => {
       setLoading(true);
       try {
         const response = await TrendingFilms(page);
-        if (response.data.results.length === 0) {
-          return toast('Введите имя фото!', {
-            position: 'top-center',
-          });
-        }
         setFilms(prevFilms => [...prevFilms, ...response.data.results]);
         scroll();
       } catch (error) {
@@ -86,24 +78,24 @@ const HomePage = () => {
     };
     Films();
   }, [page]);
-
   return (
     <>
       {loading && <h1>Loading...</h1>}
       <Gallery>
-        {films.map(film => (
-          <GalleryItem key={film.id}>
-            <GalleryItemLink to={`/movies/${film.id}`}>
-              <GalleryItemImg
-                src={`https://image.tmdb.org/t/p/w300${film.poster_path}`}
-                alt={film.original_title}
-              />
-              <GalleryItemTittle>
-                {film.original_title || film.name}
-              </GalleryItemTittle>
-            </GalleryItemLink>
-          </GalleryItem>
-        ))}
+        {films &&
+          films.map(film => (
+            <GalleryItem key={film.id}>
+              <GalleryItemLink to={`/movies/${film.id}`}>
+                <GalleryItemImg
+                  src={`https://image.tmdb.org/t/p/w300${film.poster_path}`}
+                  alt={film.original_title}
+                />
+                <GalleryItemTittle>
+                  {film.original_title || film.name}
+                </GalleryItemTittle>
+              </GalleryItemLink>
+            </GalleryItem>
+          ))}
       </Gallery>
       {films.length > 0 && (
         <GalleryItemBtn

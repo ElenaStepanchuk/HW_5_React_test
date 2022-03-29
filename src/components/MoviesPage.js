@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import styled from 'styled-components';
 import { SerchFilms } from '../helpers/FetchFilms';
-
 const Gallery = styled.ul`
   display: grid;
   justify-content: center;
@@ -51,36 +50,39 @@ const GalleryItemBtn = styled.button`
 const GalleryItemLink = styled(Link)`
   text-decoration: none;
 `;
-
 const MoviesPage = () => {
   const [query, setQuery] = useState('');
+  const [saveQuery, SetSaveQuery] = useState('');
   const [films, setFilms] = useState([]);
-  const [filmsArray, setFilmsArray] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
 
   const ChangeQuery = event => {
     setQuery(event.currentTarget.value.toLowerCase());
+    SetSaveQuery(query);
   };
   const handleSubmit = event => {
     event.preventDefault();
-    // setFilms([]);
-    console.log(films.length);
     if (query === '') {
+      setFilms([]);
       return toast('Введите имя фото!', {
         position: 'top-center',
       });
     } else if (films.length === 0) {
-      toast(`Фильм с именем  ${query} не найден, введите новое имя фильма!`, {
-        position: 'top-center',
-      });
+      setFilms([]);
       setQuery('');
+      return toast(
+        `Фильм с именем  ${query} не найден, введите новое имя фильма!`,
+        {
+          position: 'top-center',
+        }
+      );
     }
+    SetSaveQuery(query);
     setQuery('');
     setPage(1);
-    // setFilms([]);
   };
-  const scroll = () => {
+  const Scroll = () => {
     window.scrollBy({
       top: 2000,
       behavior: 'smooth',
@@ -89,21 +91,17 @@ const MoviesPage = () => {
   const handleChangePage = () => {
     setLoading(true);
     setPage(prevPage => prevPage + 1);
-    scroll();
+    Scroll();
+    console.log(page);
   };
-
-  // console.log(query);
   useEffect(() => {
-    if (query === '') return;
+    if (saveQuery === '') return;
     const SerchFilm = async () => {
       setLoading(true);
       try {
-        const response = await SerchFilms(page, query);
+        const response = await SerchFilms(page, saveQuery);
         console.log(response.data.results);
-        if (films.length === 0) {
-          setFilms(films);
-        }
-        setFilms(prevFilms => [...prevFilms, ...response.data.results]);
+        setFilms(films => [...films, ...response.data.results]);
       } catch (error) {
         console.log(error);
       } finally {
@@ -111,8 +109,8 @@ const MoviesPage = () => {
       }
     };
     SerchFilm();
-  }, [page, query]);
-
+    Scroll();
+  }, [page, saveQuery]);
   return (
     <>
       <form onSubmit={handleSubmit}>
@@ -129,15 +127,6 @@ const MoviesPage = () => {
         </label>
         <button type="submit">Serch</button>
       </form>
-      {/* {films.length > 0 && (
-        <button
-          type="submit"
-          page={page}
-          onClick={() => handleChangePage(page)}
-        >
-          More films
-        </button>
-      )} */}
       {loading && <h1>Loading...</h1>}
       <Gallery>
         {films.map(film => (
